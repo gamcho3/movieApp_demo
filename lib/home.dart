@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:demo_app/detail_page.dart';
+import 'package:demo_app/page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:http/http.dart' as http;
+import 'package:shimmer/shimmer.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -13,10 +15,12 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
-    getPosts().then((value) {
-      print(value);
+    _scrollController.addListener(() {
+      // print('offset = ${_scrollController.offset}');
     });
     super.initState();
   }
@@ -61,9 +65,18 @@ class _HomeState extends State<Home> {
           ),
           backgroundColor: Colors.white,
           actions: [
-            CircleAvatar(
-              backgroundColor: Colors.black,
-            )
+            IconButton(
+                onPressed: () {},
+                icon: Icon(
+                  Icons.search,
+                  color: Colors.black,
+                )),
+            IconButton(
+                onPressed: () {},
+                icon: Icon(
+                  Icons.more_vert,
+                  color: Colors.black,
+                )),
           ]),
       body: SingleChildScrollView(
         child: Column(
@@ -79,6 +92,7 @@ class _HomeState extends State<Home> {
                       var data = snapshot.data;
                       // print(data);
                       return ListView.separated(
+                          controller: _scrollController,
                           physics: const BouncingScrollPhysics(),
                           padding: const EdgeInsets.symmetric(horizontal: 15),
                           scrollDirection: Axis.horizontal,
@@ -94,13 +108,14 @@ class _HomeState extends State<Home> {
                                         Navigator.push(context,
                                             MaterialPageRoute(
                                                 builder: ((context) {
-                                          return DetailPage(
-                                            index: index,
-                                            data: data![index],
-                                            imageUrl:
-                                                'https://image.tmdb.org/t/p/w500${data[index]['poster_path']}',
+                                          return PageSlideView(
+                                            data: data!,
+                                            idx: index,
                                           );
-                                        })));
+                                        }))).then((value) {
+                                          _scrollController.jumpTo(double.parse(
+                                              (value * 220).toString()));
+                                        });
                                       },
                                       child: Hero(
                                         tag: 'image$index',
@@ -183,7 +198,7 @@ class _HomeState extends State<Home> {
                     builder: (context, AsyncSnapshot<List> snapshot) {
                       if (snapshot.hasData) {
                         var data = snapshot.data;
-
+                        print(data);
                         return Column(
                           children: [
                             for (var i = 0; i < data!.length; i++)
@@ -194,7 +209,7 @@ class _HomeState extends State<Home> {
                                     subtitle:
                                         Html(data: data[i]['description']),
                                   ),
-                                  Divider(
+                                  const Divider(
                                     thickness: 1,
                                   )
                                 ],
@@ -202,9 +217,7 @@ class _HomeState extends State<Home> {
                           ],
                         );
                       } else {
-                        return Center(
-                          child: CircularProgressIndicator(),
-                        );
+                        return shimmerContainer();
                       }
                     }),
               ),
@@ -212,6 +225,56 @@ class _HomeState extends State<Home> {
           ],
         ),
       ),
+    );
+  }
+
+  Column shimmerContainer() {
+    return Column(
+      children: [
+        for (var i = 0; i < 5; i++)
+          Column(
+            children: [
+              Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                enabled: true,
+                child: ListTile(
+                  title: Container(
+                    height: 10,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Colors.grey.withOpacity(0.5)),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            height: 10,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8.0),
+                                color: Colors.grey.withOpacity(0.5)),
+                          ),
+                        ),
+                        Container(
+                          height: 10,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8.0),
+                              color: Colors.grey.withOpacity(0.5)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const Divider(
+                thickness: 1,
+              )
+            ],
+          ),
+      ],
     );
   }
 }

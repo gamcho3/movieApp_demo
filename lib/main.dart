@@ -35,6 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: NavigationBar(
+        backgroundColor: Color.fromARGB(255, 231, 231, 231).withOpacity(0.3),
         selectedIndex: selectedIndex,
         destinations: [
           NavigationDestination(
