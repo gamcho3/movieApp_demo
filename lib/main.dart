@@ -1,5 +1,7 @@
-import 'package:demo_app/home.dart';
+import 'package:demo_app/home/home.dart';
+import 'package:demo_app/search/search.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,6 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
+        textTheme: GoogleFonts.nanumGothicTextTheme(),
         primarySwatch: Colors.blue,
       ),
       home: const MyHomePage(),
@@ -35,21 +38,23 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: NavigationBar(
-        backgroundColor: Color.fromARGB(255, 231, 231, 231).withOpacity(0.3),
+        backgroundColor:
+            const Color.fromARGB(255, 231, 231, 231).withOpacity(0.3),
         selectedIndex: selectedIndex,
-        destinations: [
+        destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.explore),
-            label: 'Explore',
+            icon: Icon(Icons.home),
+            label: '홈',
           ),
           NavigationDestination(
-            icon: Icon(Icons.commute),
-            label: 'Commute',
+            selectedIcon: Icon(Icons.search_rounded),
+            icon: Icon(Icons.search),
+            label: '검색',
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.bookmark),
             icon: Icon(Icons.bookmark_border),
-            label: 'Saved',
+            label: '내정보',
           ),
         ],
         onDestinationSelected: (int index) {
@@ -59,8 +64,8 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       ),
       body: [
-        Home(),
-        Container(),
+        const Home(),
+        const SearchPage(),
         Container(),
       ][selectedIndex],
     );
