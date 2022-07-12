@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:demo_app/api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:http/http.dart' as http;
@@ -13,22 +14,6 @@ class NewsList extends StatefulWidget {
 }
 
 class _NewsListState extends State<NewsList> {
-  Future<List> getPosts() async {
-    var url = Uri.parse(
-        'https://openapi.naver.com/v1/search/blog?query=영화&display=5');
-    var response = await http.get(url, headers: {
-      'Content-Type': "plain/text",
-      "X-Naver-Client-Id": "2TjUZlBOTa7Bta7BD0Ft",
-      "X-Naver-Client-Secret": "_CaRv7Sh4M"
-    });
-    if (response.statusCode == 200) {
-      var responseBody = utf8.decode(response.bodyBytes);
-      Map result = jsonDecode(responseBody);
-      return result['items'];
-    }
-    return [];
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -45,11 +30,11 @@ class _NewsListState extends State<NewsList> {
         ],
       ),
       child: FutureBuilder(
-          future: getPosts(),
+          future: NewsAPI.getPosts(),
           builder: (context, AsyncSnapshot<List> snapshot) {
             if (snapshot.hasData) {
               var data = snapshot.data;
-              print(data);
+
               return Column(
                 children: [
                   SizedBox(

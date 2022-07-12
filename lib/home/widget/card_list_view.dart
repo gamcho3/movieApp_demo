@@ -1,7 +1,5 @@
-import 'dart:convert';
-
+import 'package:demo_app/api/api.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 import '../../page_view.dart';
 
@@ -14,17 +12,6 @@ class MovieList extends StatefulWidget {
 
 class _MovieListState extends State<MovieList> {
   final ScrollController _scrollController = ScrollController();
-  Future<List> getMovie() async {
-    var url = Uri.parse(
-        'https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=a0e37bb376436cf45664b1fa59aa993d');
-    var response = await http.get(url);
-    if (response.statusCode == 200) {
-      var responseBody = utf8.decode(response.bodyBytes);
-      Map result = jsonDecode(responseBody);
-      return result['results'];
-    }
-    return [];
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +19,7 @@ class _MovieListState extends State<MovieList> {
       margin: EdgeInsets.only(top: 20),
       height: 300,
       child: FutureBuilder(
-          future: getMovie(),
+          future: MovieAPI.getMovie(),
           builder: (context, AsyncSnapshot<List> snapshot) {
             if (snapshot.hasData) {
               var data = snapshot.data;

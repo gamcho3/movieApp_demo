@@ -27,22 +27,6 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
-  Future<List> getPosts() async {
-    var url = Uri.parse(
-        'https://openapi.naver.com/v1/search/blog?query=영화&display=5');
-    var response = await http.get(url, headers: {
-      'Content-Type': "plain/text",
-      "X-Naver-Client-Id": "2TjUZlBOTa7Bta7BD0Ft",
-      "X-Naver-Client-Secret": "_CaRv7Sh4M"
-    });
-    if (response.statusCode == 200) {
-      var responseBody = utf8.decode(response.bodyBytes);
-      Map result = jsonDecode(responseBody);
-      return result['items'];
-    }
-    return [];
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
