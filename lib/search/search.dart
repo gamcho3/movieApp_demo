@@ -1,5 +1,7 @@
 import 'package:demo_app/api/api.dart';
+import 'package:demo_app/home/widget/card_list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -9,6 +11,7 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
+  final ScrollController _scrollController = ScrollController();
   final textEditingController = TextEditingController();
   final myFocusNode = FocusNode();
   var isFocus = true;
@@ -31,12 +34,12 @@ class _SearchPageState extends State<SearchPage> {
     super.dispose();
   }
 
-  Future<bool> searching(keyword) async {
+  Future<Map<String, List>> searching(keyword) async {
     var movies = await MovieAPI.searchMovie(keyword);
     var posts = await NewsAPI.getPosts(keyword: keyword, limit: 10);
-    print(movies);
-    print(posts);
-    return true;
+
+    print(posts.length);
+    return {"movie": movies, "post": posts};
   }
 
   @override
@@ -87,63 +90,80 @@ class _SearchPageState extends State<SearchPage> {
           )
         ],
       ),
-      body: Builder(builder: (context) {
-        if (isFocus || myFocusNode.hasFocus) {
-          return Container();
-        }
-        return FutureBuilder(
-            future: searching(searchingWord),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                print("error");
+      body: Padding(
+        padding: const EdgeInsets.only(top: 20),
+        child: Builder(builder: (context) {
+          if (isFocus || myFocusNode.hasFocus) {
+            return Container();
+          }
+          return FutureBuilder(
+              future: searching(searchingWord),
+              builder: (context, AsyncSnapshot<Map<String, List>> snapshot) {
+                if (snapshot.hasError) {
+                  print("error");
+                  return Container();
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  print("wating");
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData) {
+                  print("no data");
+                }
+
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasData) {
+                  print("done");
+                  var data = snapshot.data;
+                  return CustomScrollView(
+                    slivers: [
+                      // SliverAppBar(
+                      //   forceElevated: true,
+                      //   elevation: 1,
+                      //   backgroundColor: Colors.white,
+                      //   title: TextField(
+                      //     decoration: InputDecoration(
+                      //         border: InputBorder.none,
+                      //         hintText: "검색어를 입력해주세요",
+                      //         suffixIcon: GestureDetector(
+                      //           onTap: () {},
+                      //           child: Icon(
+                      //             Icons.search,
+                      //             color: Colors.black,
+                      //           ),
+                      //         )),
+                      //   ),
+                      // ),
+                      if (data!['movie']!.isNotEmpty)
+                        SliverToBoxAdapter(
+                            child: SizedBox(
+                          height: 300,
+                          child: CardList(
+                            scrollController: _scrollController,
+                            data: data['movie'],
+                          ),
+                        )),
+                      SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                              childCount: data['post']!.length,
+                              (context, index) {
+                        return Card(
+                          child: ListTile(
+                            title: Html(data: data['post']![index]['title']),
+                            subtitle:
+                                Html(data: data['post']![index]['description']),
+                          ),
+                        );
+                      }))
+                    ],
+                  );
+                }
                 return Container();
-              }
-
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                print("wating");
-                return Center(child: CircularProgressIndicator());
-              }
-
-              if (!snapshot.hasData) {
-                print("no data");
-              }
-
-              if (snapshot.connectionState == ConnectionState.done &&
-                  snapshot.hasData) {
-                print("done");
-                return CustomScrollView(
-                  slivers: [
-                    // SliverAppBar(
-                    //   forceElevated: true,
-                    //   elevation: 1,
-                    //   backgroundColor: Colors.white,
-                    //   title: TextField(
-                    //     decoration: InputDecoration(
-                    //         border: InputBorder.none,
-                    //         hintText: "검색어를 입력해주세요",
-                    //         suffixIcon: GestureDetector(
-                    //           onTap: () {},
-                    //           child: Icon(
-                    //             Icons.search,
-                    //             color: Colors.black,
-                    //           ),
-                    //         )),
-                    //   ),
-                    // ),
-                    SliverToBoxAdapter(),
-                    SliverList(
-                        delegate: SliverChildBuilderDelegate(childCount: 5,
-                            (context, index) {
-                      return ListTile(
-                        title: Text("dd"),
-                      );
-                    }))
-                  ],
-                );
-              }
-              return Container();
-            });
-      }),
+              });
+        }),
+      ),
     );
   }
 }
